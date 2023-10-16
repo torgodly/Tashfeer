@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>My Vue App</title>
+    <!-- Include the Tailwind CSS stylesheet -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="h-full grid place-items-center relative bg-[url('flag.jpg')] bg-cover bg-repeat">
+    <div id="app" class="space-y-3 px-5">
+        <div v-if="copied" class="p-4 mb-4 text-base font-medium text-green-800 rounded-lg bg-green-100 absolute top-10"
+            role="alert">
+            Text copied - تم نسخ النص
+        </div>
+        <section>
+            <label for="message" class="block mb-2 text-sm font-medium text-white ">اكتب النص هنا - Write the text
+                here</label>
+            <textarea id="message" rows="8" cols="150" v-model="message" dir="auto"
+                class="block p-2.5 w-full text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="اكتب افكارك هنا ..."></textarea>
+        </section>
+        <section class="flex item-center justify-center ">
+            <button type="button" @click="convertMessage()"
+                class="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 ">Convert
+                - تحويل</button>
+            <button type="button" @click="clearMessage()"
+                class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2">Clear
+                - مسح</button>
+        </section>
+        <div v-if="convertedMessage" class="space-y-3">
+            <section>
+                <label for="message" class="block mb-2 text-sm font-medium text-white ">After converted - بعد
+                    التحويل</label>
+                <textarea id="message" rows="8" cols="150" v-model="convertedMessage" dir="auto"
+                    class="block p-2.5 w-full text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder=""></textarea>
+            </section>
+            <section class="flex item-center justify-center ">
+                <button type="button" @click="copy()"
+                    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 w-fit">نسخ
+                    - Copy</button>
+
+            </section>
+        </div>
+
+    </div>
+
+    <!-- Include the Vue JavaScript library -->
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    message: 'فَإذا جاءَ وعْدُ الآخِرَةِ لِيَسُوءُوا وُجُوهَكم ولِيَدْخُلُوا المَسْجِدَ كَما دَخَلُوهُ أوَّلَ مَرَّةٍ ولِيُتَبِّرُوا ما عَلَوْا تَتْبِيرًا',
+                    convertedMessage: '',
+                    copied: false
+                }
+            },
+            methods: {
+                clearMessage() {
+                    this.message = '';
+                },
+                convertMessage() {
+                    // Split the input message into words based on spaces
+                    const words = this.message.split(' ');
+
+                    // Process each word to remove dots and handle "ك" and "ء"
+                    for (let i = 0; i < words.length; i++) {
+                        let word = words[i];
+                        let newWord = '';
+                        for (let j = 0; j < word.length; j++) {
+                            let char = word[j];
+                            let newChar = char;
+
+                            // Check if the character is "ك" and replace it with "ڪ"
+                            if (char === 'ك') {
+                                newChar = 'ڪ';
+                            }
+
+                            // Check if the character is a dotty letter and replace it
+                            const dottyChars = 'ةبتثجخذزشضظغفقني';
+                            const dottyReplacements = 'هٮٮٮححدرسصطعڡٯٮٮ';
+
+                            const charIndex = dottyChars.indexOf(char);
+                            if (charIndex !== -1) {
+                                newChar = dottyReplacements.charAt(charIndex);
+
+                                // Check if the character is "ي" or "ن" and handle special cases
+                                if (j === word.length - 1 || !/[ء-غف-ي]/.test(word[j + 1])) {
+                                    if (char === 'ي') {
+                                        newChar = 'ى';
+                                    } else if (char === 'ن') {
+                                        newChar = 'ں';
+                                    }
+                                }
+                            }
+
+                            newWord += newChar;
+                        }
+
+                        // Replace the original word with the dotless version
+                        words[i] = newWord;
+                    }
+
+                    // Join the dotless words and update the convertedMessage
+                    this.convertedMessage = words.join(' ');
+                },
+
+                copy() {
+                    navigator.clipboard.writeText(this.convertedMessage)
+                        .then(() => {
+                            // Add a CSS class to trigger the fade-in effect
+                            this.copied = true;
+                            setTimeout(() => {
+                                // Remove the CSS class after a delay to reset the effect
+                                this.copied = false;
+                            }, 2000); // Change 2000 to the desired duration of the effect in milliseconds
+                        })
+                        .catch((error) => {
+                            console.error('Failed to copy text: ', error);
+                        });
+                }
+
+            },
+
+        }).mount("#app");
+    </script>
+</body>
+
+</html>
